@@ -1,0 +1,19 @@
+{
+  "name": "web-server",
+  "version": "1.9.1",
+  "description": "A simple web server",
+  "main": "main",
+  "scripts": {
+    "test": "server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "0"
+  },
+  "keywords": [
+    "server"
+  ],
+  "author": "Anass Taher, Bilal Derraz",
+  "license": "UNLICENSED"
+}
