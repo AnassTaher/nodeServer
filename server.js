@@ -1,22 +1,4 @@
 // ###############################################################################
-// Web Technology at VU University Amsterdam
-// Assignment 3
-//
-// The assignment description is available on Canvas. 
-// Please read it carefully before you proceed.
-//
-// This is a template for you to quickly get started with Assignment 3.
-// Read through the code and try to understand it.
-//
-// Have you read the zyBook chapter on Node.js?
-// Have you looked at the documentation of sqlite?
-// https://www.sqlitetutorial.net/sqlite-nodejs/
-//
-// Once you are familiar with Node.js and the assignment, start implementing
-// an API according to your design by adding routes.
-
-
-// ###############################################################################
 //
 // Database setup:
 // First: Our code will open a sqlite database file for you, and create one if it not exists already.
@@ -38,6 +20,7 @@ var app = express();
 
 // We need some middleware to parse JSON data in the body of our HTTP requests:
 var bodyParser = require("body-parser");
+const e = require('express');
 app.use(bodyParser.json());
 
 
@@ -47,31 +30,63 @@ app.use(bodyParser.json());
 // TODO: Add your routes here and remove the example routes once you know how
 //       everything works.
 // ###############################################################################
-
 // This example route responds to http://localhost:3000/hello with an example JSON object.
 // Please test if this works on your own device before you make any changes.
 
 app.get("/hello", function(req, res) {
-    response_body = {'Hello': 'World'} ;
-
+    response_body = "hello world";
+	
     // This example returns valid JSON in the response, but does not yet set the
     // associated HTTP response header.  This you should do yourself in your
     // own routes!
-    res.json(response_body) ;
+    
+	res.send("<p>hello</p>");
 });
 
-// This route responds to http://localhost:3000/db-example by selecting some data from the
-// database and return it as JSON object.
-// Please test if this works on your own device before you make any changes.
-app.get('/db-example', function(req, res) {
-    // Example SQL statement to select the name of all products from a specific brand
-    db.all(`SELECT * FROM phones WHERE brand=?`, ['Fairphone'], function(err, rows) {
+
+
+//Select all phones
+app.get('/phones', function(req, res) {
+
+    db.all(`SELECT * FROM phones`, function(err, rows) {
 	
     	// TODO: add code that checks for errors so you know what went wrong if anything went wrong
+		if(err){
+			res.status(400).send(err);
+		} else{
+			res.status(200);
+		}
     	// TODO: set the appropriate HTTP response headers and HTTP response codes here.
 
     	// # Return db response as JSON
     	return res.json(rows)
+    });
+});
+
+//Select a specific phone
+app.get('/phones/:id', function(req, res) {
+
+    db.all("SELECT * FROM phones WHERE id=" + req.params.id, function(err,rows){
+		
+    	// TODO: add code that checks for errors so you know what went wrong if anything went wrong
+		
+
+		//Question: WHY THIS NO WORK???
+		// if(!result.length){
+		// 	res.status(400).send("Error");
+		// } else{
+		// 	res.status(200);
+		// }
+
+    	// TODO: set the appropriate HTTP response headers and HTTP response codes here.
+		
+
+		//Question: What do they mean with response header?
+
+
+    	// # Return db response as JSON
+		//Question: is this good enough?
+    	res.json(rows);
     });
 });
 

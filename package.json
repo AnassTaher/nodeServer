@@ -9,11 +9,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "0"
+    "url": "https://github.com/AnassTaher/nodeServer"
   },
   "keywords": [
     "server"
   ],
   "author": "Anass Taher, Bilal Derraz",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "^1.19.1",
+    "express": "^4.17.2",
+    "sqlite3": "^4.2.0"
+  }
 }
