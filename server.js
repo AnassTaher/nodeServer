@@ -51,6 +51,7 @@ app.get('/phones', function(req, res) {
     db.all(`SELECT * FROM phones`, function(err, rows) {
 	
     	// TODO: add code that checks for errors so you know what went wrong if anything went wrong
+		// Question: is this correct?
 		if(err){
 			res.status(400).send(err);
 		} else{
@@ -90,11 +91,45 @@ app.get('/phones/:id', function(req, res) {
     });
 });
 
+
+//Insert a phone into the database
 app.post('/post-example', function(req, res) {
+	//Question: Do we have to mention req,res in app.post or db.run?
 	// This is just to check if there is any data posted in the body of the HTTP request:
-	console.log(req.body);
+	db.run(`INSERT INTO phones (brand, model, os, image, screensize)
+	VALUES (?, ?, ?, ?, ?)`,
+	[item['brand'], item['model'], item['os'], item['image'],  item['screensize']], function(req,res){
 	return res.json(req.body);
+	});
 });
+ 
+
+app.delete("/delete/:id", (req, res) => {
+	db.run(
+		`DELETE FROM phones WHERE id = ?`,
+		req.params.id,
+		function (err, result) {
+			if (err) {
+				res.status(400);
+				return;
+			}
+			res.json({ "message": "id: " + req.params.id + " deleted" })
+		});
+})
+
+app.get("/reset", (req, res) => {
+	db.run(
+		`DELETE FROM phones`,
+		function (err, result) {
+			if (err) {
+				res.status(400);
+				return;
+			}
+		});
+	res.json({
+		success: "database reset succes"
+	})
+})
 
 
 // ###############################################################################
