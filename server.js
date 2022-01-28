@@ -1,135 +1,150 @@
-// ###############################################################################
-//
-// Database setup:
-// First: Our code will open a sqlite database file for you, and create one if it not exists already.
-// We are going to use the variable "db' to communicate to the database:
-// If you want to start with a clean sheet, delete the file 'phones.db'.
-// It will be automatically re-created and filled with one example item.
+//Database setup:
+const sqlite = require("sqlite3").verbose();
+let db = my_database("./phones.db");
 
-const sqlite = require('sqlite3').verbose();
-let db = my_database('./phones.db');
-
-// ###############################################################################
-// The database should be OK by now. Let's setup the Web server so we can start
-// defining routes.
-//
-// First, create an express application `app`:
-
+//Express app setup:
 var express = require("express");
 var app = express();
 
-// We need some middleware to parse JSON data in the body of our HTTP requests:
+//Middleware setup:
 var bodyParser = require("body-parser");
-const e = require('express');
+const e = require("express");
 app.use(bodyParser.json());
 
 
-// ###############################################################################
-// Routes
-// 
-// TODO: Add your routes here and remove the example routes once you know how
-//       everything works.
-// ###############################################################################
-// This example route responds to http://localhost:3000/hello with an example JSON object.
-// Please test if this works on your own device before you make any changes.
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
+//NOTE!: CHECK ERROR HANDLING AND PACKAGE.JSON REQUIREMENTS FOR THIS ASSIGNMENT (ESPECIALLY DEPENDENCIES LIKE: NODEMON)
 
-app.get("/hello", function(req, res) {
-    response_body = "hello world";
-	
-    // This example returns valid JSON in the response, but does not yet set the
-    // associated HTTP response header.  This you should do yourself in your
-    // own routes!
-    
-	res.send("<p>hello</p>");
-});
+//SIDENOTE: NOT ALL ERRORS SHOULD BE SHOWN TO THE CUSTOMERS
 
+//Function that checks if there is an id of a phone
+function findID(id){
+	let idFound = false;
+    db.get("SELECT * FROM phones WHERE id=" + id, function(err, row) {
 
+		if(err){
+			console.log("error");
+			return false;
+		}
+		
+		if(row == undefined){
+			idFound = false;
+			console.log("false id");
+		} else{
+			idFound = true;
+			console.log("id found");
+		}
+		
+		
+		
+    });
+	console.log(id);
+	console.log(idFound);
+	return idFound;
+}
 
 //Select all phones
-app.get('/phones', function(req, res) {
-
+//Works
+app.get("/phones", function(req, res) {
     db.all(`SELECT * FROM phones`, function(err, rows) {
-	
-    	// TODO: add code that checks for errors so you know what went wrong if anything went wrong
-		// Question: is this correct?
-		if(err){
-			res.status(400).send(err);
+		if(rows.length == 0){
+			res.status(404).json("Error 404");
 		} else{
 			res.status(200);
 		}
-    	// TODO: set the appropriate HTTP response headers and HTTP response codes here.
-
-    	// # Return db response as JSON
-    	return res.json(rows)
+    	res.json(rows);
     });
 });
 
 //Select a specific phone
-app.get('/phones/:id', function(req, res) {
+//Works
+app.get("/phones/:id", function(req, res) {
 
     db.all("SELECT * FROM phones WHERE id=" + req.params.id, function(err,rows){
-		
-    	// TODO: add code that checks for errors so you know what went wrong if anything went wrong
-		
-
-		//Question: WHY THIS NO WORK???
-		// if(!result.length){
-		// 	res.status(400).send("Error");
-		// } else{
-		// 	res.status(200);
-		// }
-
-    	// TODO: set the appropriate HTTP response headers and HTTP response codes here.
-		
-
-		//Question: What do they mean with response header?
-
-
-    	// # Return db response as JSON
-		//Question: is this good enough?
+		if(rows.length == 0){
+			res.status(404).json("Error 404");
+		} else{
+			res.status(200);
+		}
     	res.json(rows);
     });
 });
 
 
+app.put("/updatephone/:id", (req, res) => {
+	db.run(`UPDATE phones set brand= ?, model = ?, os = ?, image = ?, screensize = ? WHERE id = ?`,
+	[req.body.brand, req.body.model, req.body.os, req.body.image,  req.body.screensize, req.params.id],
+		(err) => {
+			if (err) {
+				res.status(400).json(req.body);
+				return;
+			}
+			res.json({
+				message: "Update succes",
+			})
+		});
+})
+
 //Insert a phone into the database
-app.post('/post-example', function(req, res) {
-	//Question: Do we have to mention req,res in app.post or db.run?
-	// This is just to check if there is any data posted in the body of the HTTP request:
+//Works (finish error handling)
+//Check input
+app.post("/post-example", function(req, res) {
+	
 	db.run(`INSERT INTO phones (brand, model, os, image, screensize)
 	VALUES (?, ?, ?, ?, ?)`,
-	[item['brand'], item['model'], item['os'], item['image'],  item['screensize']], function(req,res){
+	[req.body.brand, req.body.model, req.body.os, req.body.image,  req.body.screensize], function(err){
+	if (err) {
+		res.status(400).json({ "error": err.message })
+		return;
+	}
 	return res.json(req.body);
 	});
 });
  
+//Delete a specific phone from the database
+//Doesnt work????
+app.delete("/delete/:id", function(req, res){
+    db.all("SELECT * FROM phones WHERE id=" + req.params.id, function(err, rows) {
 
-app.delete("/delete/:id", (req, res) => {
-	db.run(
-		`DELETE FROM phones WHERE id = ?`,
-		req.params.id,
-		function (err, result) {
-			if (err) {
-				res.status(400);
-				return;
+		if(err){
+			return res.status(404).json("Error 404");
+		}
+		
+		if(rows.length === 0){
+			console.log("not defined");
+			return res.status(400).json("Error 400");
+		} 
+		
+		db.run("DELETE FROM phones WHERE id =" + req.params.id,function (err, rows){
+			if(err){
+				res.status(400).json("Error 400");
+			} else{
+				res.status(200);
 			}
 			res.json({ "message": "id: " + req.params.id + " deleted" })
 		});
+		
+    });
+
 })
 
-app.get("/reset", (req, res) => {
-	db.run(
-		`DELETE FROM phones`,
-		function (err, result) {
-			if (err) {
-				res.status(400);
-				return;
-			}
-		});
-	res.json({
-		success: "database reset succes"
-	})
-})
+
+//Delete all the phones from the database
+//Works
+// app.delete("/reset", (req, res) => {
+// 	db.run("DELETE FROM phones", function (err, rows) {
+// 			if (err) {
+// 				res.status(404).send("Error 404");
+// 			} else{
+// 				res.status(200).send("Succesfully deleted");
+// 			}
+// 		});
+// })
 
 
 // ###############################################################################
@@ -146,7 +161,7 @@ function my_database(filename) {
   		if (err) {
 			console.error(err.message);
   		}
-  		console.log('Connected to the phones database.');
+  		console.log("Connected to the phones database.");
 	});
 	// Create our phones table if it does not exist already:
 	db.serialize(() => {
@@ -163,7 +178,7 @@ function my_database(filename) {
 			if (result[0].count == 0) {
 				db.run(`INSERT INTO phones (brand, model, os, image, screensize) VALUES (?, ?, ?, ?, ?)`,
 				["Fairphone", "FP3", "Android", "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Fairphone_3_modules_on_display.jpg/320px-Fairphone_3_modules_on_display.jpg", "5.65"]);
-				console.log('Inserted dummy phone entry into empty database');
+				console.log("Inserted dummy phone entry into empty database");
 			} else {
 				console.log("Database already contains", result[0].count, " item(s) at startup.");
 			}
