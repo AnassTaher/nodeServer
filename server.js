@@ -25,13 +25,26 @@ app.use(bodyParser.json());
 //Function that checks if there is an id of a phone
 function findID(id){
 	let idFound = false;
-	db.all("SELECT * FROM phones WHERE id=" + id, function(rows){
-		if(rows.length > 0){
-			idFound = true;
+    db.get("SELECT * FROM phones WHERE id=" + id, function(err, row) {
+
+		if(err){
+			console.log("error");
+			return false;
 		}
-		console.log("Rows: " + rows.length);
-	})
-	
+		
+		if(row == undefined){
+			idFound = false;
+			console.log("false id");
+		} else{
+			idFound = true;
+			console.log("id found");
+		}
+		
+		
+		
+    });
+	console.log(id);
+	console.log(idFound);
 	return idFound;
 }
 
@@ -63,6 +76,20 @@ app.get("/phones/:id", function(req, res) {
 });
 
 
+app.put("/updatephone/:id", (req, res) => {
+	db.run(`UPDATE phones set brand= ?, model = ?, os = ?, image = ?, screensize = ? WHERE id = ?`,
+	[req.body.brand, req.body.model, req.body.os, req.body.image,  req.body.screensize, req.params.id],
+		(err) => {
+			if (err) {
+				res.status(400).json(req.body);
+				return;
+			}
+			res.json({
+				message: "Update succes",
+			})
+		});
+})
+
 //Insert a phone into the database
 //Works (finish error handling)
 //Check input
@@ -81,10 +108,18 @@ app.post("/post-example", function(req, res) {
  
 //Delete a specific phone from the database
 //Doesnt work????
-app.delete("/delete/:id", (req, res) => {
-	if(findID(req.params.id) == false){
-		return res.status(404).json("Error 404");
-	} else{
+app.delete("/delete/:id", function(req, res){
+    db.all("SELECT * FROM phones WHERE id=" + req.params.id, function(err, rows) {
+
+		if(err){
+			return res.status(404).json("Error 404");
+		}
+		
+		if(rows.length === 0){
+			console.log("not defined");
+			return res.status(400).json("Error 400");
+		} 
+		
 		db.run("DELETE FROM phones WHERE id =" + req.params.id,function (err, rows){
 			if(err){
 				res.status(400).json("Error 400");
@@ -93,20 +128,23 @@ app.delete("/delete/:id", (req, res) => {
 			}
 			res.json({ "message": "id: " + req.params.id + " deleted" })
 		});
-	}
+		
+    });
+
 })
+
 
 //Delete all the phones from the database
 //Works
-app.delete("/reset", (req, res) => {
-	db.run("DELETE FROM phones", function (err, rows) {
-			if (err) {
-				res.status(404).send("Error 404");
-			} else{
-				res.status(200).send("Succesfully deleted");
-			}
-		});
-})
+// app.delete("/reset", (req, res) => {
+// 	db.run("DELETE FROM phones", function (err, rows) {
+// 			if (err) {
+// 				res.status(404).send("Error 404");
+// 			} else{
+// 				res.status(200).send("Succesfully deleted");
+// 			}
+// 		});
+// })
 
 
 // ###############################################################################
